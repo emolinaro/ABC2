@@ -109,8 +109,6 @@ def main():
 	path = input("\n Write path to photos: ")
 	file = input("\n Write name of the project (.psx): ")
 	
-	path = "/work/sysops/molinaro/photoscan-pro/GT18_B/"
-	file = "project1_EM.psx"
 	BatchProcess(path, file, options)
 	
 
