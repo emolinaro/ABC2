@@ -29,6 +29,7 @@ def BatchProcess(path, file, options):
 	if file in list_files:
 		doc.open(psxfile)
 		chunk = doc.chunk
+		chunk = doc.addChunk()
 	else:
 		doc.save(psxfile)
 		print ("Project saved to: " + psxfile)

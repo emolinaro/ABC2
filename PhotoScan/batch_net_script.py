@@ -16,7 +16,10 @@ task = PhotoScan.Tasks.MatchPhotos()
 task.downscale = int(PhotoScan.HighAccuracy)
 task.keypoint_limit = 40000
 task.tiepoint_limit = 10000
-task.select_pairs = int(PhotoScan.NoPreselection)
+task.filter_mask = False
+task.preselection_generic = True
+task.preselection_reference = True
+task.network_distribute = True
 network_task = PhotoScan.NetworkTask()
 network_task.name = task.name
 network_task.params = task.encode()
@@ -27,11 +30,11 @@ doc.save(path)
 ### photos alignment...only on 1 node and no GPU acceleration
 
 task = PhotoScan.Tasks.AlignCameras()
+task.network_distribute = True
 network_task = PhotoScan.NetworkTask()
 network_task.name = task.name
 network_task.params = task.encode()
 network_task.chunks.append(chunk.key) #such approach should be used for AlignCameras and OptimizeCameras tasks
-network_task.network_distribute = True
 tasks.append(network_task)
 doc.save(path)
 
@@ -40,95 +43,95 @@ doc.save(path)
 task = PhotoScan.Tasks.BuildDepthMaps()
 task.downscale = int(PhotoScan.MediumQuality)
 task.filter_mode = PhotoScan.FilterMode.AggressiveFiltering
-task.reuse_depth = True  #  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+task.reuse_depth = True  
+task.network_distribute = True
 network_task = PhotoScan.NetworkTask()
 network_task.name = task.name
 network_task.params = task.encode()
 network_task.frames.append((chunk.key, 0))
-network_task.network_distribute = True
 tasks.append(network_task)
 doc.save(path)
 
 ### build dense cloud (filtering the depth maps)...multiple nodes and no GPU acceleration
 
-task = PhotoScan.Tasks.buildDenseCloud()
-task.keep_depth = True   #  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+task = PhotoScan.Tasks.BuildDenseCloud()
+task.store_depth = True   
+task.network_distribute = True
 network_task = PhotoScan.NetworkTask()
 network_task.name = task.name
 network_task.params = task.encode()
 network_task.frames.append((chunk.key, 0))
-network_task.network_distribute = True
 tasks.append(network_task)
 doc.save(path)
 
 ### build mesh...multiple nodes?? and no GPU acceleration
 
-task = PhotoScan.Tasks.buildModel()
-task.surface = PhotoScan.Arbitrary
-task.face_count = PhotoScan.HighFaceCount
+task = PhotoScan.Tasks.BuildModel()
+task.surface_type = PhotoScan.SurfaceType.Arbitrary
+task.face_count = PhotoScan.FaceCount.HighFaceCount
 task.interpolation = PhotoScan.EnabledInterpolation
 task.downscale = int(PhotoScan.MediumQuality)
-task.source = PhotoScan.DataSource.DenseCloudData
-task.keep_depth=True     #  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-task.reuse_depth=True    #  <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+task.source_data = PhotoScan.DataSource.DenseCloudData
+task.store_depth=True    
+task.reuse_depth=True    
+task.network_distribute = True
 network_task = PhotoScan.NetworkTask()
 network_task.name = task.name
 network_task.params = task.encode()
 network_task.frames.append((chunk.key, 0))
-network_task.network_distribute = True
 tasks.append(network_task)
 doc.save(path)
 
 ### build UV map...multiple nodes?? and no GPU acceleration
 
-task = PhotoScan.Tasks.buildUV()
-task.mapping = PhotoScan.GenericMapping
-task.count = 1
+task = PhotoScan.Tasks.BuildUV()
+task.mapping_mode = PhotoScan.MappingMode.GenericMapping
+task.texture_count = 1
+task.network_distribute = True
 network_task = PhotoScan.NetworkTask()
 network_task.name = task.name
 network_task.params = task.encode()
 network_task.frames.append((chunk.key, 0))
-network_task.network_distribute = True
 tasks.append(network_task)
 doc.save(path)
 
 ### build texture...multiple nodes?? and no GPU acceleration
 
-task = PhotoScan.Tasks.buildTexture()
-task.blending = PhotoScan.MosaicBlending
-task.size = 2048
+task = PhotoScan.Tasks.BuildTexture()
+task.blending_mode = PhotoScan.BlendingMode.MosaicBlending
+task.texture_size = 2048
+task.network_distribute = True
 network_task = PhotoScan.NetworkTask()
 network_task.name = task.name
 network_task.params = task.encode()
 network_task.frames.append((chunk.key, 0))
-network_task.network_distribute = True
 tasks.append(network_task)
 doc.save(path)
 
-### export model
+#### export model
 
 model_file = path[:-4] + "-model.ply"
-task = PhotoScan.Tasks.exportModel()
+task = PhotoScan.Tasks.ExportModel()
 task.path = model_file
-task.format = PhotoScan.ModelFormatPLY
+task.format = PhotoScan.ModelFormat.ModelFormatPLY
 network_task = PhotoScan.NetworkTask()
 network_task.name = task.name
 network_task.params = task.encode()
 tasks.append(network_task)
 
 model_file = path[:-4] + "-model.obj"
-task = PhotoScan.Tasks.exportModel()
+task = PhotoScan.Tasks.ExportModel()
 task.path = model_file
-task.format = PhotoScan.ModelFormatOBJ
+task.format = PhotoScan.ModelFormat.ModelFormatOBJ
 network_task = PhotoScan.NetworkTask()
 network_task.name = task.name
 network_task.params = task.encode()
 tasks.append(network_task)
 
 model_file = path[:-4] + "-model.pdf"
-task = PhotoScan.Tasks.exportModel()
+task = PhotoScan.Tasks.ExportModel()
 task.path = model_file
-task.format = PhotoScan.ModelFormatPDF
+task.format = PhotoScan.ModelFormat.ModelFormatPDF
 network_task = PhotoScan.NetworkTask()
 network_task.name = task.name
 network_task.params = task.encode()
@@ -136,15 +139,20 @@ tasks.append(network_task)
 
 ### export report 
 
-model_file = path[:-4] + "-report.pdf"
+report_file = path[:-4] + "-report.pdf"
 description = " "  # add a description 
 title = "REPORT"
-task = PhotoScan.Tasks.exportReport()
-task.path = model_file
-task.title=title
+task = PhotoScan.Tasks.ExportReport()
+task.path = report_file
+task.title = title
 task.description = description
-task.page_numbers = 1  # add page numbers
+task.page_numbers = True  # add page numbers
+network_task = PhotoScan.NetworkTask()
+network_task.name = task.name
+network_task.params = task.encode()
+tasks.append(network_task)
 
+###
 
 client.connect('172.24.0.5', 5840) #server ip
 batch_id = client.createBatch(path[len(root):], tasks)
