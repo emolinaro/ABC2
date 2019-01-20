@@ -44,7 +44,7 @@ def BatchProcess(path, file, options):
 	if options[0] == 'y':
 		### matching photos...multiple nodes and GPU acceleration
 		## the accuracy is one of [HighestAccuracy, HighAccuracy, MediumAccuracy, LowAccuracy, LowestAccuracy]
-		chunk.matchPhotos(accuracy=PhotoScan.HighAccuracy, preselection=PhotoScan.NoPreselection, 
+		chunk.matchPhotos(accuracy=PhotoScan.HighestAccuracy, preselection=PhotoScan.NoPreselection, 
 					   filter_mask=False, keypoint_limit=40000, tiepoint_limit=4000)
 		doc.save(psxfile)
 		
@@ -56,7 +56,7 @@ def BatchProcess(path, file, options):
 	if options[2] == 'y':
 		### build depth maps...multiple nodes and GPU acceleration
 		## the quality is one of [UltraQuality, HighQuality, MediumQuality, LowQuality, LowestQuality]
-		chunk.buildDepthMaps(quality=PhotoScan.MediumQuality, filter=PhotoScan.AggressiveFiltering, reuse_depth=True)
+		chunk.buildDepthMaps(quality=PhotoScan.UltraQuality, filter=PhotoScan.AggressiveFiltering, reuse_depth=True)
 		doc.save(psxfile)
 	
 	if options[3] == 'y':
@@ -68,7 +68,7 @@ def BatchProcess(path, file, options):
 		### build mesh...multiple nodes?? and no GPU acceleration
 		## the quality is one of [UltraQuality, HighQuality, MediumQuality, LowQuality, LowestQuality]
 		chunk.buildModel(surface=PhotoScan.Arbitrary, face_count=PhotoScan.HighFaceCount, 
-						 interpolation=PhotoScan.EnabledInterpolation, quality=PhotoScan.MediumQuality, keep_depth=True, reuse_depth=True)
+						 interpolation=PhotoScan.EnabledInterpolation, quality=PhotoScan.UltraQuality, keep_depth=True, reuse_depth=True)
 		doc.save(psxfile)
 		
 	if options[5] == 'y':
@@ -79,14 +79,20 @@ def BatchProcess(path, file, options):
 		
 		### export model
 		model_file = psxfile[:-4] + "-model.ply"
-		chunk.exportModel(path=model_file)
+		chunk.exportModel(path=model_file, format=PhotoScan.ModelFormatPLY)
+
+		model_file = psxfile[:-4] + "-model.obj"
+		chunk.exportModel(path=model_file, format=PhotoScan.ModelFormatOBJ)
+
+		model_file = psxfile[:-4] + "-model.pdf"
+		chunk.exportModel(path=model_file, format=PhotoScan.ModelFormatPDF)
 
 		### export report    
 		report_file = psxfile[:-4] + "-report.pdf"
 		description = " "
 		title = "REPORT"
 		chunk.exportReport(path=report_file, title=title, description=description, page_numbers=1)
-	
+	#exit()
 
 def main():
 	
@@ -98,11 +104,11 @@ def main():
 	BT= "y" # buildTexture (y/n)      # <<<<<<<<<<<<<<<<<<<
 	
 	options = [MP,AC,DM,DC,BM,BT]
-	
+
 	path = "/work/sysops/molinaro/photoscan-pro/"
 	
-	folder = "GT18_B"                 # <<<<<<<<<<<<<<<<<<<
-	file = "project2-EM.psx"          # <<<<<<<<<<<<<<<<<<<
+	folder = "GT18_B"                   # <<<<<<<<<<<<<<<<<<<
+	file = "project3-EM.psx"            # <<<<<<<<<<<<<<<<<<<
 	
 	path = "/work/sysops/molinaro/photoscan-pro/" + folder + "/"
 
