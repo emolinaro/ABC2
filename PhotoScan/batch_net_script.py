@@ -46,7 +46,7 @@ network_task.frames.append((chunk.key, 0))
 tasks.append(network_task)
 
 #############################################################################
-## 2 ## photos alignment...only multiple nodes and no GPU acceleration
+## 2 ## photos alignment...multiple nodes and no GPU acceleration
 #############################################################################
 
 task = PhotoScan.Tasks.AlignCameras()
@@ -86,7 +86,7 @@ network_task.frames.append((chunk.key, 0))
 tasks.append(network_task)
 
 #############################################################################
-## 5 ## build mesh...only 1 node and no GPU acceleration
+## 5 ## build mesh...only one node and no GPU acceleration
 #############################################################################
 
 task = PhotoScan.Tasks.BuildModel()
@@ -105,7 +105,7 @@ network_task.frames.append((chunk.key, 0))
 tasks.append(network_task)
 
 #############################################################################
-## 6 ## build UV map...only one  and no GPU acceleration
+## 6 ## build UV map...only one nd no GPU acceleration
 #############################################################################
 
 task = PhotoScan.Tasks.BuildUV()
