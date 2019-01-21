@@ -1,3 +1,20 @@
+#############################################################################
+#############################################################################
+### PhotoScan v1.4 Task Network Processing
+### 
+### Author:         Emiliano Molinaro <molinaro@imada.sdu.dk>
+### Institution:    SDU eScience Center
+### Date:           20-01-2019
+#
+# The list of the tasks that support the fine level task subdistribution is: 
+# MatchPhotos, AlignCameras, BuildDepthMaps, BuildDenseCloud, BuildTiledModel, 
+# BuildDem, BuildOrthomosaic
+#
+###
+#############################################################################
+#############################################################################
+
+
 import PhotoScan
 
 path = PhotoScan.app.getOpenFileName("Specify path to the document:")
@@ -10,7 +27,9 @@ client = PhotoScan.NetworkClient()
 
 tasks = list()
 
-### matching photos...multiple nodes and GPU acceleration
+#############################################################################
+## 1 ## matching photos...multiple nodes and GPU acceleration
+#############################################################################
 
 task = PhotoScan.Tasks.MatchPhotos()
 task.downscale = int(PhotoScan.HighestAccuracy)
@@ -26,7 +45,9 @@ network_task.params = task.encode()
 network_task.frames.append((chunk.key, 0))
 tasks.append(network_task)
 
-### photos alignment...only multiple nodes and no GPU acceleration
+#############################################################################
+## 2 ## photos alignment...only multiple nodes and no GPU acceleration
+#############################################################################
 
 task = PhotoScan.Tasks.AlignCameras()
 task.network_distribute = True
@@ -36,7 +57,9 @@ network_task.params = task.encode()
 network_task.chunks.append(chunk.key) #such approach should be used for AlignCameras and OptimizeCameras tasks
 tasks.append(network_task)
 
-### build depth maps...multiple nodes and GPU acceleration
+#############################################################################
+## 3 ## build depth maps...multiple nodes and GPU acceleration
+#############################################################################
 
 task = PhotoScan.Tasks.BuildDepthMaps()
 task.downscale = int(PhotoScan.HighQuality)
@@ -49,7 +72,9 @@ network_task.params = task.encode()
 network_task.frames.append((chunk.key, 0))
 tasks.append(network_task)
 
-### build dense cloud (filtering the depth maps)...multiple nodes and no GPU acceleration
+#############################################################################
+## 4 ## build dense cloud (filtering the depth maps)...multiple nodes and no GPU acceleration
+#############################################################################
 
 task = PhotoScan.Tasks.BuildDenseCloud()
 task.store_depth = True   
@@ -60,7 +85,9 @@ network_task.params = task.encode()
 network_task.frames.append((chunk.key, 0))
 tasks.append(network_task)
 
-### build mesh...only 1 node and no GPU acceleration
+#############################################################################
+## 5 ## build mesh...only 1 node and no GPU acceleration
+#############################################################################
 
 task = PhotoScan.Tasks.BuildModel()
 task.surface_type = PhotoScan.SurfaceType.Arbitrary
@@ -77,7 +104,9 @@ network_task.params = task.encode()
 network_task.frames.append((chunk.key, 0))
 tasks.append(network_task)
 
-### build UV map...only one  and no GPU acceleration
+#############################################################################
+## 6 ## build UV map...only one  and no GPU acceleration
+#############################################################################
 
 task = PhotoScan.Tasks.BuildUV()
 task.mapping_mode = PhotoScan.MappingMode.GenericMapping
@@ -88,7 +117,9 @@ network_task.params = task.encode()
 network_task.frames.append((chunk.key, 0))
 tasks.append(network_task)
 
-### build texture...only one node and no GPU acceleration
+#############################################################################
+## 7 ## build texture...only one node and no GPU acceleration
+#############################################################################
 
 task = PhotoScan.Tasks.BuildTexture()
 task.blending_mode = PhotoScan.BlendingMode.MosaicBlending
@@ -100,7 +131,9 @@ network_task.frames.append((chunk.key, 0))
 tasks.append(network_task)
 doc.save(path)
 
-#### export model
+#############################################################################
+## 8 ## export model (PLY, OBJ, PDF)
+#############################################################################
 
 model_file = path[:-4] + "-model.ply"
 task = PhotoScan.Tasks.ExportModel()
@@ -135,7 +168,9 @@ network_task.params = task.encode()
 network_task.frames.append((chunk.key, 0))
 tasks.append(network_task)
 
-### export report 
+#############################################################################
+## 9 ## export report 
+#############################################################################
 
 report_file = path[:-4] + "-report.pdf"
 description = " "  # add a description 
@@ -151,7 +186,9 @@ network_task.params = task.encode()
 network_task.frames.append((chunk.key, 0))
 tasks.append(network_task)
 
-###
+#############################################################################
+## 10 ## distribute the tasks over the network
+#############################################################################
 
 client.connect('172.24.0.5', 5840) #server ip
 batch_id = client.createBatch(path[len(root):], tasks)
