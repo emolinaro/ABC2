@@ -32,7 +32,7 @@ tasks = list()
 #############################################################################
 
 task = PhotoScan.Tasks.MatchPhotos()
-task.downscale = int(PhotoScan.HighestAccuracy)
+task.downscale = int(PhotoScan.HighestAccuracy) # [Highest, High, Medium, Low, Lowest]
 task.keypoint_limit = 40000
 task.tiepoint_limit = 10000
 task.filter_mask = False
@@ -54,7 +54,7 @@ task.network_distribute = True
 network_task = PhotoScan.NetworkTask()
 network_task.name = task.name
 network_task.params = task.encode()
-network_task.chunks.append(chunk.key) #such approach should be used for AlignCameras and OptimizeCameras tasks
+network_task.chunks.append(chunk.key) # such approach should be used for AlignCameras and OptimizeCameras tasks
 tasks.append(network_task)
 
 #############################################################################
@@ -62,7 +62,7 @@ tasks.append(network_task)
 #############################################################################
 
 task = PhotoScan.Tasks.BuildDepthMaps()
-task.downscale = int(PhotoScan.HighQuality)
+task.downscale = int(PhotoScan.HighQuality) # [Utra, High, Medium, Low, Lowest]
 task.filter_mode = PhotoScan.FilterMode.AggressiveFiltering
 task.reuse_depth = True  
 task.network_distribute = True
@@ -91,10 +91,10 @@ tasks.append(network_task)
 
 task = PhotoScan.Tasks.BuildModel()
 task.surface_type = PhotoScan.SurfaceType.Arbitrary
-task.face_count = PhotoScan.FaceCount.HighFaceCount
+task.face_count = PhotoScan.FaceCount.HighFaceCount # [High, Medium, Low]
 task.interpolation = PhotoScan.EnabledInterpolation
 task.downscale = int(PhotoScan.HighQuality)
-task.source_data = PhotoScan.DataSource.DenseCloudData
+task.source_data = PhotoScan.DataSource.DenseCloudData # [PointCloudData,DenseCloudData,DepthMapsData,ModelData,TiledModelData,ElevationData,OrthomosaicData,ImagesData]
 task.store_depth=True    
 task.reuse_depth=True    
 task.network_distribute = True
