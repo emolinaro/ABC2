@@ -105,7 +105,7 @@ network_task.frames.append((chunk.key, 0))
 tasks.append(network_task)
 
 #############################################################################
-## 6 ## build UV map...only one nd no GPU acceleration
+## 6 ## build UV map...only one node and no GPU acceleration
 #############################################################################
 
 task = PhotoScan.Tasks.BuildUV()
